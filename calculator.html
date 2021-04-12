@@ -1,0 +1,289 @@
+<!doctype html>
+<html>
+   <head>
+        <title> Basic Calculator</title>
+        <h1>Basic Calculator</h1>
+   </head>
+   <body>
+    </div class="viewer">
+        <textarea id="screen" name="screen" rows="3" cols="10" style="text-align:right;font-size:45px;"></textarea>
+    <div>
+    <div>
+        <table id="calculator">
+            <td id="calcbuttonsandscreen">
+                <table>
+                    <tr>
+                        <td>
+                            <input type="image" id="no1" src="one.png" width="50" height="50" onclick="updateScreen(1)">
+                        </td>
+                        <td>
+                            <input type="image" id="no2" src="two.png" width="50" height="50" onclick="updateScreen(2)">
+                        </td>
+                        <td>
+                            <input type="image" id="no3" src="three.png" width="50" height="50" onclick="updateScreen(3)">
+                        </td>
+                        <td>
+                            <input type="image" id="addition" src="addition.png" width="50" height="50" onclick="updateScreen('+')">
+                        </td>
+                        
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="image" id="no4" src="four.png" width="50" height="50" onclick="updateScreen(4)">
+                        </td>
+                        <td>
+                            <input type="image" id="no5" src="five.png" width="50" height="50" onclick="updateScreen(5)">
+                        </td>
+                        <td>
+                            <input type="image" id="no6" src="six.png" width="50" height="50" onclick="updateScreen(6)">
+                        </td>
+                        <td>
+                            <input type="image" id="subtraction" src="subtraction.png" width="50" height="50" onclick="updateScreen('-')">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="image" id="no7" src="seven.png" width="50" height="50" onclick="updateScreen(7)">
+                        </td>
+                        <td>
+                            <input type="image" id="no8" src="eight.png" width="50" height="50" onclick="updateScreen(8)">
+                        </td>
+                        <td>
+                            <input type="image" id="no9" src="nine.png" width="50" height="50" onclick="updateScreen(9)">
+                        </td>
+                        <td>
+                            <input type="image" id="multiplication" src="multiplication.png" width="50" height="50" onclick="updateScreen('x')">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="image" id="equal" src="equalsign.png" width="50" height="50" onclick="solve()">
+                        </td>
+                        <td>
+                            <input type="image" id="no0" src="zero.png" width="50" height="50" onclick="updateScreen(0)">
+                        </td>
+                        <td>
+                            <input type="image" id="remove" src="remove.png" width="50" height="50" onclick="removeLastItem()">
+                        </td>
+                        <td>
+                            <input type="image" id="division" src="division.png" width="50" height="50" onclick="updateScreen('/')">
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <td id="calconandoff">
+                <td id = "powerimage">
+                    <input type="image" id="statepic" src="offbutton.png" width="50" height="50" onclick="switchOn()">
+                </td>
+                <td>
+                    <h2 id="state">State: OFF</h2>
+                </td>
+            </td>
+        </table>
+    </div>
+    <div>
+        <input type="image" id="reset" src="reset.png" width="100" height="100" onclick="resetScreen()">
+    </div>
+   </body>
+   <style>
+      table, td {
+        border: 1px solid black;
+      }
+   </style>   
+   <script>
+       var screenstring = "",elementstring ="";
+       var expression = [];
+       var postfix = [];
+       var powerStatus=0;
+       var canchange = true;
+
+       function isDigit(a){
+            if (a >= '0' && a <= '9'){
+                return true;
+            }
+            return false;
+       }
+
+       //this is when the user uses the buttons on the calculator
+       function updateScreen(a){
+           if (powerStatus == 0){
+               return;
+           }
+           if(!canchange && isDigit(a)){
+                screenstring = "" + a;
+                elementstring = "" + a;
+                expression=[];
+                postfix=[];
+                document.getElementById("screen").value = screenstring;
+                canchange=true;
+                return;
+           }
+           var n = elementstring.length;
+           //when we try to enter two consecutive operators
+           if (n > 0 && !isDigit(elementstring.charAt(n-1)) && !isDigit(a)){
+                alert("ERROR: Two consecutive operators are not permitted");
+           }
+           else{
+               //when we enter a new digit or an operator as a
+                if(!isDigit(a)){
+                    canchange = true;
+                }
+
+                if(n > 0 && screenstring.length == 1 && 
+                (!isDigit(elementstring.charAt(n-1)) && isDigit(a))){
+                    screenstring += a;
+                    elementstring += a;
+                    document.getElementById("screen").value = screenstring;
+                }
+
+                else if (n > 0 && ((isDigit(elementstring.charAt(n-1)) && !isDigit(a)) || 
+                             (!isDigit(elementstring.charAt(n-1)) && isDigit(a)))){
+                    expression.push(elementstring);//whatever elementstring is before we add a, lets put it in expression
+                    elementstring = "" + a;//beginning a new element e.g a number or an operator
+                    screenstring += a;
+                    document.getElementById("screen").value = screenstring;
+                }
+
+                else{
+                    screenstring += a;
+                    elementstring += a;
+                    document.getElementById("screen").value = screenstring;
+                }       
+           } 
+       }
+
+       //used to remove the last item
+       function removeLastItem(){
+            if (powerStatus == 0){
+               return;
+            }
+
+           if (screenstring.length == 0){
+                return;
+           }
+           screenstring = screenstring.substring(0, screenstring.length - 1);
+
+           if (elementstring.length == 0){
+                elementstring = expression[expression.length - 1];
+                expression.pop();
+                if (!isDigit(elementstring)){
+                    elementstring = expression[expression.length - 1];
+                    expression.pop();
+                }
+                document.getElementById("screen").value = screenstring;
+           }
+
+            else if(elementstring.length == 1){
+                elementstring = "";
+                document.getElementById("screen").value = screenstring;
+            }
+
+            else{
+                elementstring = elementstring.substring(0, elementstring.length - 1);
+                document.getElementById("screen").value = screenstring;
+            }
+       }
+
+       //used to evaluate the expression entered to the calculator and display the result on the screen
+       function solve(){
+            if (powerStatus == 0){
+               return;
+            }
+
+           expression.push(elementstring);
+           elementstring="";
+           infixToPostfix();
+           var result = evalBasedOnPostfix().toString();
+           expression=[];
+           postfix=[];
+           screenstring = result;
+           document.getElementById("screen").value = screenstring;
+           elementstring=result;
+           canchange=false;
+
+       }
+
+        //clears previous evaluations or elements written to the screen
+       function resetScreen(){
+            if (powerStatus == 0){
+               return;
+            }
+
+            screenstring = "";
+            elementstring ="";
+            expression = [];
+            postfix=[];
+            document.getElementById("screen").value = screenstring;
+       }
+
+       function priority(op){
+           if(op == 'x' || op == '/'){
+               return 2;
+           }
+           return 1;
+       }
+
+       //changes from infix to postfix notation
+       function infixToPostfix(){
+            var stack = [];
+            for(i=0;i<expression.length;i++){
+                if(expression[i].length == 1 && !isDigit(expression[i].charAt(0))){
+                    while(stack.length != 0 && priority(expression[i].charAt(0)) <= priority(stack[stack.length - 1].charAt(0))){
+                        var last = stack.pop();
+                        postfix.push(last);
+                    }
+                    stack.push(expression[i]);
+                }
+                else{
+                    postfix.push(expression[i]);
+                }
+            }
+            while(stack.length != 0){
+                postfix.push(stack.pop());
+            }
+       }
+
+       //evaluate the expression entered to the calculator
+       function evalBasedOnPostfix(){
+           var stack = [];
+           for(i=0;i<postfix.length;i++){
+               if(postfix[i].length == 1 && !isDigit(postfix[i].charAt(0))){
+                   var b = stack.pop();
+                   var a = stack.pop();
+                   if(postfix[i] == "+"){
+                       stack.push(parseFloat(a+b));
+                   }
+                   if(postfix[i] == "-"){
+                        stack.push(parseFloat(a-b));
+                   }
+                   if(postfix[i] == "/"){
+                       stack.push(parseFloat(a/b));
+                   }
+                   if(postfix[i] == "x"){
+                       stack.push(parseFloat(a*b));
+                   }
+               }
+               else{
+                   stack.push(parseFloat(postfix[i]));
+               }
+           }
+           return stack[0];
+       }
+
+       //switch off the calculator
+       function switchOff(){
+            resetScreen();
+            powerStatus = 0;
+            document.getElementById("powerimage").innerHTML = "<input type='image' id='statepic' src='offbutton.png' width=50 height=50 onclick=switchOn()>";
+            document.getElementById("state").innerHTML = "State: OFF";
+       }
+
+       //switch on the calculator
+       function switchOn(){
+            resetScreen();
+            powerStatus = 1;
+            document.getElementById("powerimage").innerHTML = "<input type='image' id='statepic' src='onbutton.png' width=50 height=50 onclick=switchOff()>";
+            document.getElementById("state").innerHTML = "State: ON";
+       }
+   </script>
+</html>
